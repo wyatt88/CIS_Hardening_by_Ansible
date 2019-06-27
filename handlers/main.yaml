@@ -1,0 +1,22 @@
+---
+- name: restart postfix
+  systemd:
+    name: postfix
+    state: restarted
+  changed_when: False
+  ignore_errors: True
+
+- name: restart rsyslog
+  systemd:
+    name: rsyslog
+    state: restarted
+  changed_when: False
+  ignore_errors: True
+
+- name: restart ssh
+  systemd:
+    name: sshd
+    state: restarted
+  changed_when: False
+  ignore_errors: True
+

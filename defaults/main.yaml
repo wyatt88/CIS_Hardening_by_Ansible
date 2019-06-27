@@ -1,0 +1,39 @@
+## Amazon Linux 2
+## Section 1
+# Default root password: abcd-1234
+amazonlinux2cis_set_root_password: false
+amazonlinux2cis_root_password: 
+
+amazonlinux2cis_restrict_core_dumps: true
+amazonlinux2cis_enable_aslr: true
+
+## Section 2
+# Define time synchronization software: "ntp" or "chrony", Default is "Chrony"
+amazonlinux2cis_time_synchronization_software: chrony
+
+## Setion 3
+amazonlinux2cis_net_ipv4_ip_forward: 0
+amazonlinux2cis_enable_tcp_syncookies: true
+amazonlinux2cis_disable_ipv6: true
+
+## Section 4
+amazonlinux2cis_enable_syslog: true
+# Define syslog package: "rsyslog" or "syslog-ng", Default is "rsyslog"
+amazonlinux2cis_syslog_package: rsyslog
+amazonlinux2cis_set_rsyslog_remote: false
+amazonlinux2cis_remote_logs_host_address: 
+
+## Section 5
+amazonlinux2cis_ensure_ssh_access_is_limited: false
+amazonlinux2cis_sshd_allow_users: sshuser
+amazonlinux2cis_sshd_allow_groups: sshusersallow
+amazonlinux2cis_sshd_deny_users: sshdenied
+amazonlinux2cis_sshd_deny_groups: sshusersdeny
+
+amazonlinux2cis_password_complexity: false
+amazonlinux2cis_lockout_for_failed_password_attempts_pam_tally2: false
+amazonlinux2cis_password_expiration_ninty_days: false
+amazonlinux2cis_password_change_seven_day_delay: false
+
+amazonlinux2cis_modify_user_homes: false
+

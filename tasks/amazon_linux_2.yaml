@@ -1,0 +1,2383 @@
+---
+
+## Section 1  -- Initial Setup
+## Section 1.1 -- Filesystem Configuration
+## Section 1.1.1 -- Disable unused filesystems
+- name: 1.1.1.1 Ensure mounting of cramfs filesystems is disabled (Scored)
+  lineinfile:
+    dest: /etc/modprobe.d/CIS.conf
+    line: 'install cramfs /bin/true'
+    state: present
+    create: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.1
+    - section1.1.1.1
+    - level1
+
+- name: 1.1.1.2 Ensure mounting of hfs filesystems is disabled (Scored)
+  lineinfile:
+    dest: /etc/modprobe.d/CIS.conf
+    line: 'install hfs /bin/true'
+    state: present
+    create: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.1
+    - section1.1.1.2
+    - level1
+
+- name: 1.1.1.3 Ensure mounting of hfsplus filesystems is disabled (Scored)
+  lineinfile:
+    dest: /etc/modprobe.d/CIS.conf
+    line: 'install hfsplus /bin/true'
+    state: present
+    create: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.1
+    - section1.1.1.3
+    - level1
+
+- name: 1.1.1.4 Ensure mounting of squashfs filesystems is disabled (Scored)
+  lineinfile:
+    dest: /etc/modprobe.d/CIS.conf
+    line: 'install squashfs /bin/true'
+    state: present
+    create: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.1
+    - section1.1.1.4
+    - level1
+
+- name: 1.1.1.5 Ensure mounting of udf filesystems is disabled (Scored)
+  lineinfile:
+    dest: /etc/modprobe.d/CIS.conf
+    line: 'install udf /bin/true'
+    state: present
+    create: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.1
+    - section1.1.1.5
+    - level1
+
+## Not in CIS_Amazon_Linux_2_Benchmark
+- name: Ensure monuting of freevxfs filesystems is disabled
+  lineinfile:
+    dest: /etc/modprobe.d/CIS.conf
+    line: 'install freevxfs /bin/true'
+    state: present
+    create: yes
+  tags:
+    - amazonlinux2
+    - section.1
+
+- name: Ensure monuting of FAT filesystems is disabled
+  lineinfile:
+    dest: /etc/modprobe.d/CIS.conf
+    line: 'install fat /bin/true'
+    state: present
+    create: yes
+  tags:
+    - amazonlinux2
+    - section.1
+
+## Section 1.1.2 -- Ensure /tmp is configured
+- name: 1.1.2 Ensure /tmp is configured (Scored)
+  shell: grep -l '\s/tmp\s' /etc/fstab
+  register: tmp_partition
+  failed_when: tmp_partition.rc == 1
+  changed_when: false
+  ignore_errors: yes
+  tags:
+    - amazonlinux2
+    - section.1
+    - section.1.1
+    - section.1.1.2
+    - level1
+
+## Section 1.1.3 -- Ensure nodev option set on /tmp partition
+- name: 1.1.3 Ensure nodev option set on /tmp partition (Scored)
+  shell: mount | grep /tmp | grep nodev
+  register: mount_tmp_nodev
+  failed_when: mount_tmp_nodev.rc == 1
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.3
+    - level1
+
+## Section 1.1.4 -- Ensure nosuid option set on /tmp partition
+- name: 1.1.4 Ensure nosuid option set on /tmp partition (Scored)
+  shell: mount | grep /tmp | grep nosuid
+  register: mount_tmp_nosuid
+  failed_when: mount_tmp_nosuid.rc == 1
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.4
+    - level1
+
+## Section 1.1.5 -- Ensure noexec option set on /tmp partition (Scored)
+- name: 1.1.5 Ensure noexec option set on /tmp partition (Scored)
+  shell: mount | grep /tmp | grep noexec
+  register: mount_tmp_noexec
+  failed_when: mount_tmp_noexec.rc == 1
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.5
+    - level1
+
+- name: Mount tmpfs to /tmp
+  mount:
+    path: /tmp
+    src: tmpfs
+    fstype: tmpfs
+    opts: defaults,rw,nosuid,nodev,noexec,relatime
+    state: mounted
+  when: tmp_partition.rc == 1 or mount_tmp_nodev.rc == 1 or mount_tmp_nosuid.rc == 1 or mount_tmp_noexec.rc == 1
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.2
+    - section1.1.3
+    - section1.1.4
+    - section1.1.5
+    - level1
+
+## Section 1.1.6 -- Ensure separate partition exists for /var
+- name: 1.1.6 Ensure separate partition exists for /var (Scored)
+  shell: grep -l '\s/var\s' /etc/fstab
+  register: var_partition
+  failed_when: var_partition.rc == 1
+  changed_when: false
+  ignore_errors: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.6
+    - level2
+
+## Section 1.1.7 -- Ensure separate partition exists for /var/tmp 
+- name: 1.1.7 Ensure separate partition exists for /var/tmp (Scored)
+  shell: grep -l '\s/var/tmp\s' /etc/fstab
+  register: var_tmp_partition
+  failed_when: var_tmp_partition.rc == 1
+  changed_when: false
+  ignore_errors: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.7
+    - level2
+
+## Section 1.1.8 -- Ensure nodev option set on /var/tmp partition
+- name: 1.1.8 Ensure nodev option set on /var/tmp partition (Scored)
+  shell: mount | grep /var/tmp | grep nodev
+  register: mount_var_tmp_nodev
+  failed_when: mount_var_tmp_nodev.rc == 1
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.8
+    - level1
+
+## Section 1.1.9 -- Ensure nosuid option set on /var/tmp partition
+- name: 1.1.9 Ensure nosuid option set on /var/tmp partition (Scored)
+  shell: mount | grep /var/tmp | grep nosuid
+  register: mount_var_tmp_nosuid
+  failed_when: mount_var_tmp_nosuid.rc == 1
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.9
+    - level1
+
+## Section 1.1.10 -- Ensure noexec option set on /var/tmp partition
+- name: 1.1.10 Ensure noexec option set on /var/tmp partition (Scored)
+  shell: mount | grep /var/tmp | grep noexec
+  register: mount_var_tmp_noexec
+  failed_when: mount_var_tmp_noexec.rc == 1
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.10
+    - level1
+
+- name: Mount tmpfs to /var/tmp
+  mount:
+    path: /var/tmp
+    src: tmpfs
+    fstype: tmpfs
+    opts: defaults,rw,nosuid,nodev,noexec,relatime
+    state: mounted
+  when: var_tmp_partition.rc == 1 or mount_var_tmp_nodev.rc == 1 or mount_var_tmp_nosuid.rc == 1 or mount_var_tmp_noexec.rc == 1
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.7
+    - section1.1.8
+    - section1.1.9
+    - section1.1.10
+    - level1
+
+## Section 1.1.11 -- Ensure separate partition exists for /var/log
+- name: 1.1.11 Ensure separate partition exists for /var/log (Scored)
+  shell: grep -l '\s/var/log\s' /etc/fstab
+  register: var_log_partition
+  failed_when: var_log_partition.rc == 1
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.11
+    - level2
+
+## Section 1.1.12 -- Ensure separate partition exists for /var/log/audit
+- name: 1.1.12 Ensure separate partition exists for /var/log/audit (Scored)
+  shell: grep -l '\s/var/log/audit\s' /etc/fstab
+  register: var_log_audit_partition
+  failed_when: var_log_audit_partition.rc == 1
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.12
+    - level2
+
+## Section 1.1.13 -- Ensure separate partition exists for /home
+- name: 1.1.13 Ensure separate partition exists for /home (Scored)
+  shell: grep -l '\s/home\s' /etc/fstab
+  register: home_partition
+  failed_when: home_partition.rc == 1
+  changed_when: false
+  ignore_errors: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.13
+
+## Section 1.1.14 -- Ensure nodev option set on /home partition
+
+## Section 1.1.15 -- Ensure nodev option set on /dev/shm partition
+- name: 1.1.15 Ensure nodev option set on /dev/shm partition (Scored)
+  shell: mount | grep /dev/shm | grep nodev
+  register: mount_dev_shm_nodev
+  failed_when: mount_dev_shm_nodev.rc == 1
+  changed_when: false
+  ignore_errors: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.15
+    - level1
+
+## Section 1.1.16 -- Ensure nosuid option set on /dev/shm partition
+- name: 1.1.16 Ensure nosuid option set on /dev/shm partition (Scored)
+  shell: mount | grep /dev/shm | grep nosuid
+  register: mount_dev_shm_nosuid
+  failed_when: mount_dev_shm_nosuid.rc == 1
+  changed_when: false
+  ignore_errors: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.16
+    - level1
+
+## Section 1.1.17 -- Ensure noexec option set on /dev/shm partition
+- name: 1.1.17 Ensure noexec option set on /dev/shm partition (Scored)
+  shell: mount | grep /dev/shm | grep noexec
+  register: mount_dev_shm_noexec
+  failed_when: mount_dev_shm_noexec.rc == 1
+  changed_when: false
+  ignore_errors: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.17
+    - level1
+
+- name: Mount options to /dev/shm
+  mount:
+    path: /dev/shm
+    src: tmpfs
+    fstype: tmpfs
+    opts: defaults,rw,nosuid,nodev,noexec,relatime
+    state: mounted
+  when: mount_dev_shm_nodev.rc == 1 or mount_dev_shm_nosuid.rc == 1 or mount_dev_shm_noexec.rc == 1
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.15
+    - section1.1.16
+    - section1.1.17
+    - level1
+
+## Section 1.1.18 -- Ensure sticky bit is set on all world-writable directories (Scored)
+- shell: df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type d -perm -0002 -print 2>/dev/null
+  failed_when: false
+  changed_when: false
+  check_mode: no
+  register: sticky_bit_dirs
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.18
+    - level1
+
+- name: 1.1.18 Ensure sticky bit is set on all world-writable directories (Scored)
+  file:
+    path: "{{ item }}"
+    mode: "a+t"
+  with_items: "{{sticky_bit_dirs.stdout_lines}}"
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.1
+    - section1.1.18
+    - level1
+
+## Section 1.1.19 -- Disable Automounting (Scored) -- Ignore, no autofs service in Amazon Linux 2
+# - name: 1.1.19 Disable Automounting (Scored)
+#   systemd:
+#     name: autofs
+#     enabled: no
+#   tags:
+#     - amazonlinux2
+#     - section1
+#     - section1.1
+#     - section1.1.19
+#     - level1
+
+## Section 1.2 -- Configure Software Updates
+## Section 1.2.1 -- Ensure package manager repositories are configured (Not Scored)
+- name: 1.2.1 Ensure package manager repositories are configured (Not Scored)
+  shell: yum repolist
+  register: yum_repolist_result
+  failed_when: yum_repolist_result.rc == 1
+  changed_when: false
+  ignore_errors: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.2
+    - section1.2.1
+    - level1
+
+## Section 1.2.2 -- Ensure GPG keys are configured (Not Scored)
+# - name: 1.2.2 Ensure GPG keys are configured (Not Scored)
+#   shell: grep 
+
+## Section 1.2.3 -- Ensure gpgcheck is globally activated (Scored)
+- name: Find files in /etc/yum.repos.d
+  find:
+    paths: /etc/yum.repos.d
+    file_type: file
+  register: repos_files
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.2
+    - section1.2.3
+    - level1
+
+- name: 1.2.3 Ensure gpgcheck is globally activated (Scored) - /etc/yum.conf
+  replace:
+    path: /etc/yum.conf
+    regexp: '^gpgcheck=0$'
+    line: gpgcheck=1
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.2
+    - section1.2.3
+    - level1
+
+- name: 1.2.3 Ensure gpgcheck is globally activated (Scored) - /etc/yum.repo.d
+  replace:
+    path: '{{ item.path }}'
+    regexp: '^gpgcheck=0$'
+    line: gpgcheck=1
+  with_items:
+    - "{{ repos_files.files }}"
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.2
+    - section1.2.3
+    - level1
+
+## Section 1.3 -- Filesystem Integrity Checking
+## Section 1.3.1 -- Ensure AIDE is installed (Scored)
+- name: 1.3.1 Ensure AIDE is installed (Scored)
+  yum:
+    name: aide
+    state: present
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.3
+    - section1.3.1
+    - level1
+
+## Section 1.3.2 -- Ensure filesystem integrity is regularly checked (Scored)
+## Requirement: AIDE
+- name: 1.3.2 Ensure filesystem integrity is regularly checked (Scored)
+  cron:
+    name: "Check files integrity"
+    minute: 0
+    hour: 5
+    job: "/usr/sbin/aide --check"
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.3
+    - section1.3.2
+    - level1
+
+## Section 1.4 -- Secure Boot Settings
+## Section 1.4.1 -- Ensure permissions on bootloader config are configured (Scored)
+- name: 1.4.1 Ensure permissions on bootloader config are configured (Scored) -- /boot/grub2/grub.cfg
+  file:
+    dest: /boot/grub2/grub.cfg
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.4
+    - section1.4.1
+    - level1
+
+# - name: 1.4.1 Ensure permissions on bootloader config are configured (Scored) -- /etc/grub2.cfg
+#   file:
+#     dest: /etc/grub2.cfg
+#     owner: root
+#     group: root
+#     mode: 0600
+#   tags:
+#     - amazonlinux2
+#     - section1
+#     - section1.4
+#     - section1.4.1
+#     - level1
+
+## Section 1.4.2 Ensure authentication required for single user mode (Scored)
+# - command: grep "^root:[*\!]:" /etc/shadow
+#   register: amazonlinux2cis_root_password_set
+#   failed_when: false
+#   ignore_errors: true
+#   changed_when: false
+#   tags:
+#     - amazonlinux2
+#     - section.1
+
+# - name: 1.4.2 Ensure authentication required for single user mode (Scored)
+#   user:
+#     name: root
+#     state: present
+#     password: "{{  amazonlinux2cis_root_password }}"
+#   when:
+#     -  amazonlinux2cis_root_password_set.rc == 0
+#     -  amazonlinux2cis_set_root_password
+#   tags:
+#     - amazonlinux2
+#     - section.1
+
+# - name: 1.4.2 Ensure authentication required for single user mode (Scored)
+#   lineinfile:
+#     dest: /etc/sysconfig/init
+#     line: 'SINGLE=/sbin/sulogin'
+#     state: present
+#   when:
+#     -  amazonlinux2cis_root_password_set.rc == 0
+#     -  amazonlinux2cis_set_root_password
+#   tags:
+#     - amazonlinux2
+#     - section.1
+
+## Section 1.5 -- Additional Process Hardening
+## Section 1.5.1 -- Ensure core dumps are restricted (Scored)
+- command: grep "hard core" /etc/security/limits.conf
+  register: hard_core
+  failed_when: false
+  changed_when: false
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.5
+    - section1.5.1
+    - level1
+
+- name: Ensure core dumps are restricted
+  lineinfile:
+    dest: '/etc/security/limits.conf'
+    line: '* hard core 0'
+    state: present
+    insertbefore: '^# End of file'
+  when: hard_core.rc != 0
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.5
+    - section1.5.1
+    - level1
+
+- name: Ensure core dumps are restricted
+  sysctl:
+    name: fs.suid_dumpable
+    value: 0
+    state: present
+  when: amazonlinux2cis_restrict_core_dumps
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.5
+    - section1.5.1
+    - level1
+
+## Section 1.5.2 -- Ensure address space layout randomization (ASLR) is enabled (Scored)
+- name: 1.5.2 Ensure address space layout randomization (ASLR) is enabled (Scored)
+  sysctl:
+    name: kernel.randomize_va_space
+    value: 2
+    state: present
+  when: amazonlinux2cis_enable_aslr
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.5
+    - section1.5.2
+    - level1
+
+## Section 1.5.3 -- Ensure prelink is disabled (Scored)
+- name: Check prelink installed
+  shell: rpm -q prelink
+  register: check_prelink_installed
+  failed_when: check_prelink_installed.rc == 0
+  changed_when: false
+  ignore_errors: yes
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.5
+    - section1.5.3
+    - level1
+
+- name: 1.5.3 Ensure prelink is disabled (Scored) -- prelink
+  command: prelink -ua
+  when: check_prelink_installed.rc == 0
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.5
+    - section1.5.3
+    - level1
+
+- name: 1.5.3 Ensure prelink is disabled (Scored) -- yum
+  yum:
+    name: prelink
+    state: absent
+  when: check_prelink_installed.rc == 0
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.5
+    - section1.5.3
+    - level1
+
+## Section 1.6 -- Mandatory Access Control
+## Section 1.6.1 -- Configure SELinux
+## Section 1.6.2 -- Ensure SELinux is installed (Scored)
+## Skipped 
+
+## Section 1.7 -- Warning Banners
+## Section 1.7.1 -- Command Line Warning Banners
+# - name: 1.7.1.1 Ensure message of the day is configured properly (Scored)
+
+- name: 1.7.1.2 Ensure local login warning banner is configured properly (Not Scored)
+  shell: echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.7
+    - section1.7.1
+    - section1.7.1.2
+    - level1
+
+- name: 1.7.1.3 Ensure remote login warning banner is configured properly (Not Scored)
+  shell: echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue.net
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.7
+    - section1.7.1
+    - section1.7.1.3
+    - level1
+
+- name: 1.7.1.4 Ensure permissions on /etc/motd are configured (Not Scored)
+  file:
+    path: /etc/motd
+    owner: root
+    group: root
+    mode: '0644'
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.7
+    - section1.7.1
+    - section1.7.1.4
+    - level1
+
+- name: 1.7.1.5 Ensure permissions on /etc/issue are configured (Scored)
+  file:
+    path: /etc/issue
+    owner: root
+    group: root
+    mode: '0644'
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.7
+    - section1.7.1
+    - section1.7.1.5
+    - level1
+
+- name: 1.7.1.6 Ensure permissions on /etc/issue.net are configured (Not Scored)
+  file:
+    path: /etc/issue.net
+    owner: root
+    group: root
+    mode: '0644'
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.7
+    - section1.7.1
+    - section1.7.1.6
+    - level1
+
+## Section 1.8 -- Ensure updates, patches, and additional security software are installed (Scored)
+- name: 1.8 Ensure updates, patches, and additional security software are installed (Scored)
+  yum:
+    security: yes
+    state: latest
+    name: '*'
+  tags:
+    - amazonlinux2
+    - section1
+    - section1.8
+    - level1
+
+## Section 2 Services
+## Section 2.1 -- Special Purpose Services
+## Section 2.1.1 -- Time Synchronization
+- name: 2.1.1.1 Ensure time synchronization is in use (Not Scored)
+  yum:
+    name: "{{amazonlinux2cis_time_synchronization_software}}"
+    state: present
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.1
+    - section2.1.1.1
+    - level1
+
+# - name: 2.1.1.2 Ensure ntp is configured (Scored) -- restrict
+# - name: 2.1.1.3 Ensure chrony is configured (Scored)
+
+## Section 2.1.2 -- Ensure X Window System is not installed (Scored)
+- name: 2.1.2 Ensure X Window System is not installed (Scored)
+  yum:
+    name: 'xorg-x11*'
+    state: absent
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.2
+    - level1
+
+## Section 2.1.3 -- Ensure Avahi Server is not enabled (Scored)
+- name: 2.1.3 Ensure Avahi Server is not enabled (Scored)
+  systemd:
+    name: avahi-daemon
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.3
+    - level1
+
+## Section 2.1.4 -- Ensure CUPS is not enabled (Scored)
+- name: 2.1.4 Ensure CUPS is not enabled (Scored)
+  systemd:
+    name: cups
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.4
+    - level1
+
+## Section 2.1.5 -- Ensure DHCP Server is not enabled (Scored)
+- name: 2.1.5 Ensure DHCP Server is not enabled (Scored)
+  systemd:
+    name: dhcpd
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.5
+    - level1
+
+## Section 2.1.6 -- Ensure LDAP server is not enabled (Scored)
+- name: 2.1.6 Ensure LDAP server is not enabled (Scored)
+  systemd:
+    name: slapd
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.6
+    - level1
+
+## Section 2.1.7 -- Ensure NFS and RPC are not enabled (Scored)
+- name: 2.1.7 Ensure NFS and RPC are not enabled (Scored)
+  systemd:
+    name: '{{item}}'
+    enabled: no
+    state: stopped
+  with_items:
+    - nfs
+    - nfs-server
+    - rpcbind
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.7
+    - level1
+
+## Section 2.1.8 -- Ensure DNS Server is not enabled (Scored)
+- name: 2.1.8 Ensure DNS Server is not enabled (Scored)
+  systemd:
+    name: named
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.8
+    - level1
+
+## Section 2.1.9 -- Ensure FTP Server is not enabled (Scored)
+- name: 2.1.9 Ensure FTP Server is not enabled (Scored)
+  systemd:
+    name: vsftpd
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.9
+    - level1
+
+## Section 2.1.10 -- Ensure HTTP server is not enabled (Scored)
+- name: 2.1.10 Ensure HTTP server is not enabled (Scored)
+  systemd:
+    name: httpd
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.10
+    - level1
+
+## Section 2.1.11 -- Ensure IMAP and POP3 server is not enabled (Scored)
+- name: 2.1.11 Ensure IMAP and POP3 server is not enabled (Scored)
+  systemd:
+    name: dovecot
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.11
+    - level1
+
+## Section 2.1.12 -- Ensure Samba is not enabled (Scored)
+- name: 2.1.12 Ensure Samba is not enabled (Scored)
+  systemd:
+    name: smb
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.12
+    - level1
+
+## Section 2.1.13 -- Ensure HTTP Proxy Server is not enabled (Scored)
+- name: 2.1.13 Ensure HTTP Proxy Server is not enabled (Scored)
+  systemd:
+    name: squid
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.13
+    - level1
+
+## Section 2.1.14 -- Ensure SNMP Server is not enabled (Scored)
+- name: 2.1.14 Ensure SNMP Server is not enabled (Scored)
+  systemd:
+    name: snmpd
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.14
+    - level1
+
+## Section 2.1.15 -- Ensure mail transfer agent is configured for local-only mode (Scored)
+- name: 2.1.15 Ensure mail transfer agent is configured for local-only mode (Scored)
+  lineinfile:
+    dest: /etc/postfix/main.cf
+    regexp: '^inet_interfaces'
+    line: 'inet_interfaces = localhost'
+    state: present
+    create: no
+  notify: restart postfix
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.15
+    - level1
+
+## Section 2.1.16 -- Ensure NIS Server is not enabled (Scored)
+- name: 2.1.16 Ensure NIS Server is not enabled (Scored)
+  systemd:
+    name: ypserv
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.16
+    - level1
+
+## Section 2.1.17 -- Ensure rsh server is not enabled (Scored)
+- name: 2.1.17 Ensure rsh server is not enabled (Scored)
+  systemd:
+    name: '{{item}}'
+    enabled: no
+    state: stopped
+  with_items:
+    - rsh.socket
+    - rlogin.socket
+    - rexec.socket
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.17
+    - level1
+
+## Section 2.1.18 -- Ensure telnet server is not enabled (Scored)
+- name: 2.1.18 Ensure telnet server is not enabled (Scored)
+  systemd:
+    name: telnet.socket
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.18
+    - level1
+
+## Section 2.1.19 -- Ensure tftp server is not enabled (Scored)
+- name: 2.1.19 Ensure tftp server is not enabled (Scored)
+  systemd:
+    name: tftp.socket
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.19
+    - level1
+
+## Section 2.1.20 -- Ensure rsync service is not enabled (Scored) -- Use rsync,please comment this section
+# - name: 2.1.20 Ensure rsync service is not enabled (Scored)
+#   systemd:
+#     name: rsyncd
+#     enabled: no
+#     state: stopped
+#   tags:
+#     - amazonlinux2
+#     - section2
+#     - section2.1
+#     - section2.1.20
+#     - level1
+
+## Section 2.1.21 -- Ensure talk server is not enabled (Scored)
+- name: 2.1.21 Ensure talk server is not enabled (Scored)
+  systemd:
+    name: ntalk
+    enabled: no
+    state: stopped
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.1
+    - section2.1.21
+    - level1
+
+## Section 2.2 -- Service Clients
+## Section 2.2.1 -- Ensure NIS Client is not installed (Scored)
+- name: 2.2.1 Ensure NIS Client is not installed (Scored)
+  yum:
+    name: ypbind
+    state: absent
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.2
+    - section2.2.1
+    - level1
+
+## Section 2.2.2 -- Ensure rsh client is not installed (Scored)
+- name: 2.2.2 Ensure rsh client is not installed (Scored)
+  yum:
+    name: rsh
+    state: absent
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.2
+    - section2.2.2
+    - level1
+
+## Section 2.2.3 -- Ensure talk client is not installed (Scored)
+- name: 2.2.3 Ensure talk client is not installed (Scored)
+  yum:
+    name: talk
+    state: absent
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.2
+    - section2.2.3
+    - level1
+
+## Section 2.2.4 -- Ensure telnet client is not installed (Scored)
+- name: 2.2.4 Ensure telnet client is not installed (Scored)
+  yum:
+    name: telnet
+    state: absent
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.2
+    - section2.2.4
+    - level1
+
+## Section 2.2.5 -- Ensure LDAP client is not installed (Scored)
+- name: 2.2.5 Ensure LDAP client is not installed (Scored)
+  yum:
+    name: openldap-clients
+    state: absent
+  tags:
+    - amazonlinux2
+    - section2
+    - section2.2
+    - section2.2.5
+    - level1
+
+## Section 3 Network Configuration
+## Section 3.1 -- Network Parameters (Host Only)
+## Section 3.1.1 -- Ensure IP forwarding is disabled (Scored)
+- name: 3.1.1 Ensure IP forwarding is disabled (Scored)
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '{{amazonlinux2cis_net_ipv4_ip_forward}}'
+    state: present
+    sysctl_set: yes
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.1
+    - section3.1.1
+    - level1
+
+## Section 3.1.2 -- Ensure packet redirect sending is disabled (Scored)
+- name: 3.1.2 Ensure packet redirect sending is disabled (Scored)
+  sysctl:
+    name: "{{ item }}"
+    value: 0
+    state: present
+    sysctl_set: yes
+    reload: yes
+  with_items:
+    - net.ipv4.conf.all.send_redirects
+    - net.ipv4.conf.default.send_redirects
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.1
+    - section3.1.2
+    - level1
+
+
+## Section 3.2 -- Network Parameters (Host and Router)
+## Section 3.2.1 -- Ensure source routed packets are not accepted (Scored)
+- name: 3.2.1 Ensure source routed packets are not accepted (Scored)
+  sysctl:
+    name: "{{item}}"
+    value: 0
+    state: present
+    sysctl_set: yes
+    reload: yes
+  with_items:
+    - net.ipv4.conf.all.accept_source_route
+    - net.ipv4.conf.default.accept_source_route
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.2
+    - section3.2.1
+    - level1
+
+## Section 3.2.2 -- Ensure ICMP redirects are not accepted (Scored)
+- name: 3.2.2 Ensure ICMP redirects are not accepted (Scored)
+  sysctl:
+    name: "{{item}}"
+    value: 0
+    state: present
+    sysctl_set: yes
+    reload: yes
+  with_items:
+    - net.ipv4.conf.all.accept_redirects
+    - net.ipv4.conf.default.accept_redirects
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.2
+    - section3.2.2
+    - level1
+
+## Section 3.2.3 -- Ensure secure ICMP redirects are not accepted (Scored)
+- name: 3.2.3 Ensure secure ICMP redirects are not accepted (Scored)
+  sysctl:
+    name: "{{item}}"
+    value: 0
+    state: present
+    sysctl_set: yes
+  with_items:
+    - net.ipv4.conf.all.secure_redirects
+    - net.ipv4.conf.default.secure_redirects
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.2
+    - section3.2.3
+    - level1
+
+## Section 3.2.4 -- Ensure suspicious packets are logged (Scored)
+- name: 3.2.4 Ensure suspicious packets are logged (Scored)
+  sysctl:
+    name: "{{item}}"
+    value: 1
+    state: present
+    sysctl_set: yes
+  with_items:
+    - net.ipv4.conf.all.log_martians
+    - net.ipv4.conf.default.log_martians
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.2
+    - section3.2.4
+    - level1
+
+## Section 3.2.5 -- Ensure broadcast ICMP requests are ignored (Scored)
+- name: 3.2.5 Ensure broadcast ICMP requests are ignored (Scored)
+  sysctl:
+    name: net.ipv4.icmp_echo_ignore_broadcasts
+    value: 1
+    state: present
+    sysctl_set: yes
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.2
+    - section3.2.5
+    - level1
+
+## Section 3.2.6 -- Ensure bogus ICMP responses are ignored (Scored)
+- name: 3.2.6 Ensure bogus ICMP responses are ignored (Scored)
+  sysctl:
+    name: net.ipv4.icmp_ignore_bogus_error_responses
+    value: 1
+    state: present
+    sysctl_set: yes
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.2
+    - section3.2.6
+    - level1
+
+## Section 3.2.7 -- Ensure Reverse Path Filtering is enabled (Scored)
+- name: 3.2.7 Ensure Reverse Path Filtering is enabled (Scored)
+  sysctl:
+    name: "{{item}}"
+    value: 1
+    state: present
+    sysctl_set: yes
+    reload: yes
+  with_items:
+    - net.ipv4.conf.all.rp_filter
+    - net.ipv4.conf.default.rp_filter
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.2
+    - section3.2.7
+    - level1
+
+## Section 3.2.8 -- Ensure TCP SYN Cookies is enabled (Scored)
+- name: 3.2.8 Ensure TCP SYN Cookies is enabled (Scored)
+  sysctl:
+    name: net.ipv4.tcp_syncookies
+    value: 1
+    state: present
+    sysctl_set: yes
+    reload: yes
+  when: amazonlinux2cis_enable_tcp_syncookies
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.2
+    - section3.2.8
+    - level1
+
+## Section 3.2.9 -- Ensure IPv6 router advertisements are not accepted (Scored)
+- name: 3.2.9 Ensure IPv6 router advertisements are not accepted (Scored)
+  sysctl:
+    name: "{{item}}"
+    value: 0
+    state: present
+    reload: yes
+    sysctl_set: yes
+  with_items:
+    - net.ipv6.conf.all.accept_ra
+    - net.ipv6.conf.default.accept_ra
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.2
+    - section3.2.9
+    - level1
+
+## Section 3.3 -- TCP Wrappers
+## Section 3.3.1 -- Ensure TCP Wrappers is installed (Scored)
+- name: 3.3.1 Ensure TCP Wrappers is installed (Scored)
+  yum:
+    name: tcp_wrappers
+    state: present
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.3
+    - section3.3.1
+    - level1
+
+## Section 3.3.2 -- Ensure /etc/hosts.allow is configured (Not Scored) -- Igrore in AWS
+## Section 3.3.3 -- Ensure /etc/hosts.deny is configured (Not Scored) -- Igrore in AWS
+## Section 3.3.4 -- Ensure permissions on /etc/hosts.allow are configured (Scored)
+## Section 3.3.5 -- Ensure permissions on /etc/hosts.deny are configured (Scored)
+
+## Section 3.4 -- Uncommon Network Protocols
+## Section 3.4.1 -- Ensure DCCP is disabled (Not Scored)
+- name: 3.4.1 Ensure DCCP is disabled (Not Scored)
+  lineinfile:
+    dest: /etc/modprobe.d/CIS.conf
+    line: 'install dccp /bin/true'
+    state: present
+    create: True
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.4
+    - section3.4.1
+    - level1
+
+## Section 3.4.2 -- Ensure SCTP is disabled (Not Scored)
+- name: 3.4.2 Ensure SCTP is disabled (Not Scored)
+  lineinfile:
+    dest: /etc/modprobe.d/CIS.conf
+    line: 'install sctp /bin/true'
+    state: present
+    create: True
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.4
+    - section3.4.2
+    - level1
+
+## Section 3.4.3 -- Ensure RDS is disabled (Not Scored)
+- name: 3.4.3 Ensure RDS is disabled (Not Scored)
+  lineinfile:
+    dest: /etc/modprobe.d/CIS.conf
+    line: 'install rds /bin/true'
+    state: present
+    create: True
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.4
+    - section3.4.3
+    - level1
+
+## Section 3.4.4 -- Ensure TIPC is disabled (Not Scored)
+- name: 3.4.4 Ensure TIPC is disabled (Not Scored)
+  lineinfile:
+    dest: /etc/modprobe.d/CIS.conf
+    line: 'install tipc /bin/true'
+    state: present
+    create: True
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.4
+    - section3.4.4
+    - level1
+
+## Section 3.5 -- Firewall Configuration -- Ignore
+## Section 3.5.1 -- Configure IPv4 iptables
+## Section 3.5.1.1 -- Ensure default deny firewall policy (Scored)
+## Section 3.5.1.2 -- Ensure loopback traffic is configured (Scored)
+## Section 3.5.1.3 -- Ensure outbound and established connections are configured (Not Scored)
+## Section 3.5.1.4 -- Ensure firewall rules exist for all open ports (Scored)
+## Section 3.5.2 -- Configure IPv6 ip6tables
+## Section 3.5.2.1 -- Ensure IPv6 default deny firewall policy (Scored)
+## Section 3.5.2.2 -- Ensure IPv6 loopback traffic is configured (Scored)
+## Section 3.5.2.3 -- Ensure IPv6 outbound and established connections are configured (Not Scored)
+## Section 3.5.2.4 -- Ensure IPv6 firewall rules exist for all open ports (Not Scored)
+## Section 3.5.3 -- Ensure iptables is installed (Scored)
+
+## Section 3.6 -- Disable IPv6 (Not Scored)
+- name: 3.6 Disable IPv6 (Not Scored)
+  sysctl:
+    name: "{{ item }}"
+    value: 1
+    state: present
+    sysctl_set: yes
+    reload: yes 
+  with_items:
+    - net.ipv6.conf.all.disable_ipv6
+    - net.ipv6.conf.default.disable_ipv6
+    - net.ipv6.conf.lo.disable_ipv6
+  when: amazonlinux2cis_disable_ipv6
+  tags:
+    - amazonlinux2
+    - section3
+    - section3.6
+    - level2
+
+- name: Flush IPv4 through sysctl
+  sysctl:
+    name: net.ipv4.route.flush
+    value: 1
+    state: present
+    sysctl_set: yes
+    reload: yes
+  tags:
+    - amazonlinux2
+    - section3
+
+- name: Flush IPv6 through sysctl
+  sysctl:
+    name: net.ipv6.route.flush
+    value: 1
+    state: present
+    sysctl_set: yes
+    reload: yes
+  tags:
+    - amazonlinux2
+    - section3
+
+## Section 4 Logging and Auditing
+## Section 4.1 -- Configure System Accounting (auditd) -- Level 2
+## Section 4.1.1 -- Configure Data Retention
+## Section 4.1.1.1 -- Ensure audit log storage size is configured (Not Scored)
+## Section 4.1.1.2 -- Ensure system is disabled when audit logs are full (Scored)
+## Section 4.1.1.3 -- Ensure audit logs are not automatically deleted (Scored)
+## Section 4.1.2 -- Ensure auditd service is enabled (Scored)
+## Section 4.1.3 -- Ensure auditing for processes that start prior to auditd is enabled (Scored)
+## Section 4.1.4 -- Ensure events that modify date and time information are collected (Scored)
+## Section 4.1.5 -- Ensure events that modify user/group information are collected (Scored)
+## Section 4.1.6 -- Ensure events that modify the system's network environment are collected (Scored)
+## Section 4.1.7 -- Ensure events that modify the system's Mandatory Access Controls are collected (Scored)
+## Section 4.1.8 -- Ensure login and logout events are collected (Scored)
+## Section 4.1.9 -- Ensure session initiation information is collected (Scored)
+## Section 4.1.10 -- Ensure discretionary access control permission modification events are collected (Scored)
+## Section 4.1.11 -- Ensure unsuccessful unauthorized file access attempts are collected (Scored)
+## Section 4.1.12 -- Ensure use of privileged commands is collected (Scored)
+## Section 4.1.13 -- Ensure successful file system mounts are collected (Scored)
+## Section 4.1.14 -- Ensure file deletion events by users are collected (Scored)
+## Section 4.1.15 -- Ensure changes to system administration scope (sudoers) is collected (Scored)
+## Section 4.1.16 -- Ensure system administrator actions (sudolog) are collected (Scored)
+## Section 4.1.17 -- Ensure kernel module loading and unloading is collected (Scored)
+## Section 4.1.18 -- Ensure the audit configuration is immutable (Scored)
+
+## Section 4.2 -- Configure Logging
+## Section 4.2.1 -- Configure rsyslog
+- name: 4.2.1.1 Ensure rsyslog Service is enabled (Scored)
+  systemd:
+    name: rsyslog
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  tags:
+    - amazonlinux2
+    - section4
+    - section4.2
+    - section4.2.1
+    - section4.2.1.1
+    - level1
+
+- name: 4.2.1.2 Ensure logging is configured (Not Scored)
+  lineinfile:
+      dest: /etc/rsyslog.conf
+      line: '{{ item }}'
+      insertafter: EOF
+  with_items:
+    - '*.emerg :omusrmsg:*'
+    - 'mail.* -/var/log/mail'
+    - 'mail.info -/var/log/mail.info'
+    - 'mail.warning -/var/log/mail.warn'
+    - 'mail.err /var/log/mail.err'
+    - 'news.crit -/var/log/news/news.crit'
+    - 'news.err -/var/log/news/news.err'
+    - 'news.notice -/var/log/news/news.notice'
+    - '*.=warning;*.=err -/var/log/warn'
+    - '*.crit /var/log/warn'
+    - '*.*;mail.none;news.none -/var/log/messages'
+    - 'local0,local1.* -/var/log/localmessages'
+    - 'local2,local3.* -/var/log/localmessages'
+    - 'local4,local5.* -/var/log/localmessages'
+    - 'local6,local7.* -/var/log/localmessages'
+  notify: restart rsyslog
+  when:
+    - amazonlinux2cis_syslog_package == "rsyslog"
+    - amazonlinux2cis_enable_syslog
+  tags:
+    - amazonlinux2
+    - section4
+    - section4.2
+    - section4.2.1
+    - section4.2.1.2
+    - level1
+
+- command: find /etc/rsyslog.d -type f
+  register: rsyslog_files
+  changed_when: False
+  when:
+    - amazonlinux2cis_enable_syslog
+    - amazonlinux2cis_syslog_package == "rsyslog"
+  tags:
+    - amazonlinux2
+    - section4
+    - section4.2
+    - section4.2.1
+    - section4.2.1.3
+    - level1
+
+- command: grep ^\\$FileCreateMode {{ item }}
+  with_items:
+    - '/etc/rsyslog.conf'
+    - '{{ rsyslog_files.stdout_lines }}'
+  register: filecreate_exists
+  ignore_errors: True
+  notify: restart rsyslog
+  when:
+    - amazonlinux2cis_enable_syslog
+    - amazonlinux2cis_syslog_package == "rsyslog"
+  tags:
+    - amazonlinux2
+    - section4
+    - section4.2
+    - section4.2.1
+    - section4.2.1.3
+    - level1
+
+- name: 4.2.1.3 Ensure rsyslog default file permissions configured (Scored)
+  lineinfile:
+    dest: "{{ item }}"
+    regexp: '^\$FileCreateMode'
+    line: '$FileCreateMode 0640'
+  with_items:
+    - '/etc/rsyslog.conf'
+    - '{{ rsyslog_files.stdout_lines }}'
+  notify: restart rsyslog
+  ignore_errors: true
+  when: 
+    - filecreate_exists == 0 and amazonlinux2cis_syslog_package == "rsyslog"
+    - amazonlinux2cis_enable_syslog
+  tags:
+    - amazonlinux2
+    - section4
+    - section4.2
+    - section4.2.1
+    - section4.2.1.3
+    - level1
+
+- command: grep "^*.*[^I][^I]*@" /etc/rsyslog.conf
+  register: remoteloghost
+  changed_when: False
+  failed_when: False
+  check_mode: no
+  when:
+    - amazonlinux2cis_set_rsyslog_remote
+    - amazonlinux2cis_syslog_package == "rsyslog"
+  tags:
+    - amazonlinux2
+    - section4
+    - section4.2
+    - section4.2.1
+    - section4.2.1.4
+    - level1
+
+- name: 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host (Scored)
+  lineinfile:
+    dest: /etc/rsyslog.conf
+    line: '*.* @@{{amazonlinux2cis_remote_logs_host_address}}'
+    insertafter: EOF
+    state: present
+  notify: restart rsyslog
+  when:
+    - amazonlinux2cis_set_rsyslog_remote
+    - remoteloghost.rc == 1
+    - amazonlinux2cis_syslog_package == "rsyslog"
+  tags:
+    - amazonlinux2
+    - section4
+    - section4.2
+    - section4.2.1
+    - section4.2.1.4
+    - level1
+
+# - name: 4.2.1.5 Ensure remote rsyslog messages are only accepted on designated log hosts. (Not Scored)
+
+## Section 4.2.2 -- Configure syslog-ng -- Skip now
+## Section 4.2.2.1 -- Ensure syslog-ng service is enabled (Scored)
+## Section 4.2.2.2 -- Ensure logging is configured (Not Scored)
+## Section 4.2.2.3 -- Ensure syslog-ng default file permissions configured (Scored)
+## Section 4.2.2.4 -- Ensure syslog-ng is configured to send logs to a remote log host (Not Scored)
+## Section 4.2.2.5 -- Ensure remote syslog-ng messages are only accepted on designated log hosts (Not Scored)
+
+## Section 4.2.3 -- Ensure rsyslog or syslog-ng is installed (Scored)
+- name: 4.2.3 Ensure rsyslog or syslog-ng is installed (Scored)
+  yum:
+    name: '{{amazonlinux2cis_syslog_package}}'
+    state: latest
+  tags:
+    - amazonlinux2
+    - section4
+    - section4.2
+    - section4.2.3
+    - level1
+
+## Section 4.2.4 -- Ensure permissions on all logfiles are configured (Scored)
+- name: 4.2.4 Ensure permissions on all logfiles are configured (Scored)
+  shell: chmod -R g-wx,o-rwx /var/log/*
+  tags:
+    - amazonlinux2
+    - section4
+    - section4.2
+    - section4.2.4
+    - level1
+
+## Section 4.3 -- Ensure logrotate is configured (Not Scored)
+- name: 4.3 Ensure logrotate is configured (Not Scored)
+  file:
+    name: "{{ item }}"
+  with_items:
+    - '/etc/logrotate.conf'
+  tags:
+    - amazonlinux2
+    - section4
+    - section4.3
+    - level1
+
+## Section 5 -- Access, Authentication and Authorization
+## Section 5.1 -- Configure cron
+## Section 5.1.1 -- Ensure cron daemon is enabled (Scored)
+- name: 5.1.1 Ensure cron daemon is enabled (Scored)
+  systemd:
+    name: crond
+    state: started
+    enabled: yes
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.1
+    - section5.1.1
+    - level1
+
+## Section 5.1.2 -- Ensure permissions on /etc/crontab are configured (Scored)
+- name: 5.1.2 Ensure permissions on /etc/crontab are configured (Scored)
+  file:
+    path: /etc/crontab
+    owner: root
+    group: root
+    mode: "og-rwx"
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.1
+    - section5.1.2
+    - level1
+
+## Section 5.1.3 -- Ensure permissions on /etc/cron.hourly are configured (Scored)
+- name: 5.1.3 Ensure permissions on /etc/cron.hourly are configured (Scored)
+  file:
+    path: /etc/cron.hourly
+    owner: root
+    group: root
+    mode: "og-rwx"
+    state: directory
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.1
+    - section5.1.3
+    - level1
+
+## Section 5.1.4 -- Ensure permissions on /etc/cron.daily are configured (Scored)
+- name: 5.1.4 Ensure permissions on /etc/cron.daily are configured (Scored)
+  file:
+    path: /etc/cron.daily
+    owner: root
+    group: root
+    mode: "og-rwx"
+    state: directory
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.1
+    - section5.1.4
+    - level1
+
+## Section 5.1.5 -- Ensure permissions on /etc/cron.weekly are configured (Scored)
+- name: 5.1.5 Ensure permissions on /etc/cron.weekly are configured (Scored)
+  file:
+    path: /etc/cron.weekly
+    owner: root
+    group: root
+    mode: "og-rwx"
+    state: directory
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.1
+    - section5.1.5
+    - level1
+
+## Section 5.1.6 -- Ensure permissions on /etc/cron.monthly are configured (Scored)
+- name: 5.1.6 Ensure permissions on /etc/cron.monthly are configured (Scored)
+  file:
+    path: /etc/cron.monthly
+    owner: root
+    group: root
+    mode: "og-rwx"
+    state: directory
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.1
+    - section5.1.6
+    - level1
+
+## Section 5.1.7 -- Ensure permissions on /etc/cron.d are configured (Scored)
+- name: 5.1.7 Ensure permissions on /etc/cron.d are configured (Scored)
+  file:
+    path: /etc/cron.d
+    state: directory
+    owner: root
+    group: root
+    mode: "og-rwx"
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.1
+    - section5.1.7
+    - level1
+
+## Section 5.1.8 -- Ensure at/cron is restricted to authorized users (Scored)
+- name: 5.1.8 Ensure at/cron is restricted to authorized users (Scored)
+  file:
+    path: "{{ item.name }}"
+    owner: root
+    group: root
+    mode: 0600
+    state: "{{ item.state }}"
+  with_items:
+    - { name: '/etc/cron.deny' , state: 'absent' }
+    - { name: '/etc/at.deny' , state: 'absent' }
+    - { name: '/etc/cron.allow' , state: 'touch' }
+    - { name: '/etc/at.allow' , state: 'touch' }
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.1
+    - section5.1.7
+    - level1
+
+## Section 5.2 -- SSH Server Configuration
+## Section 5.2.1 -- Ensure permissions on /etc/ssh/sshd_config are configured (Scored)
+- name: 5.2.1 Ensure permissions on /etc/ssh/sshd_config are configured (Scored)
+  file:
+    path: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: og-rwx
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.1
+    - level1
+
+## Section 5.2.2 -- Ensure permissions on SSH private host key files are configured (Scored)
+## Section 5.2.3 -- Ensure permissions on SSH public host key files are configured (Scored)
+
+## Section 5.2.4 -- Ensure SSH Protocol is set to 2 (Scored)
+- name: 5.2.4 Ensure SSH Protocol is set to 2 (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^Protocol'
+    line: 'Protocol 2'
+  notify: restart ssh
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.4
+    - level1
+
+## Section -- 5.2.5 Ensure SSH LogLevel is appropriate (Scored)
+- name: 5.2.5 Ensure SSH LogLevel is appropriate (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^LogLevel'
+    line: 'LogLevel INFO'
+  notify: restart ssh
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.5
+    - level1
+
+## Section 5.2.6 -- Ensure SSH X11 forwarding is disabled (Scored)
+- name: 5.2.6 Ensure SSH X11 forwarding is disabled (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^X11Forwarding'
+    line: 'X11Forwarding no'
+  notify: restart ssh
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.6
+    - level1
+
+## Section 5.2.7 -- Ensure SSH MaxAuthTries is set to 4 or less (Scored)
+- name: 5.2.7 Ensure SSH MaxAuthTries is set to 4 or less (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^MaxAuthTries'
+    line: 'MaxAuthTries 4'
+  notify: restart ssh
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.7
+    - level1
+
+## Section 5.2.8 -- Ensure SSH IgnoreRhosts is enabled (Scored)
+- name: 5.2.8 Ensure SSH IgnoreRhosts is enabled (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^IgnoreRhosts'
+    line: 'IgnoreRhosts yes'
+  notify: restart ssh
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.8
+    - level1
+
+## Section 5.2.9 -- Ensure SSH HostbasedAuthentication is disabled (Scored)
+- name: 5.2.9 Ensure SSH HostbasedAuthentication is disabled (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^HostbasedAuthentication'
+    line: 'HostbasedAuthentication no'
+  notify: restart ssh
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.9
+    - level1
+
+## Section 5.2.10 -- Ensure SSH root login is disabled (Scored)
+- name: 5.2.10 Ensure SSH root login is disabled (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin no'
+  notify: restart ssh
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.10
+    - level1
+
+## Section 5.2.11 -- Ensure SSH PermitEmptyPasswords is disabled (Scored)
+- name: 5.2.11 Ensure SSH PermitEmptyPasswords is disabled (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^PermitEmptyPasswords'
+    line: 'PermitEmptyPasswords no'
+  notify: restart ssh
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.11
+    - level1
+
+## Section 5.2.12 -- Ensure SSH PermitUserEnvironment is disabled (Scored)
+- name: 5.2.12 Ensure SSH PermitUserEnvironment is disabled (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^PermitUserEnvironment'
+    line: 'PermitUserEnvironment no'
+  notify: restart ssh
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.12
+    - level1
+
+## Section 5.2.13 -- Ensure only strong ciphers are used (Scored)
+## Section 5.2.14 -- Ensure only strong MAC algorithms are used (Scored)
+## Section 5.2.15 -- Ensure that strong Key Exchange algorithms are used (Scored)
+
+## Section 5.2.16 -- Ensure SSH Idle Timeout Interval is configured (Scored)
+- name: 5.2.16 Ensure SSH Idle Timeout Interval is configured (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^{{item.name}}'
+    line: '{{item.name}} {{item.value}}'
+  with_items:
+    - { name: 'ClientAliveInterval' , value: '300' }
+    - { name: 'ClientAliveCountMax' , value: '0' }
+  notify: restart ssh
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.16
+    - level1
+
+## Section 5.2.17 -- Ensure SSH LoginGraceTime is set to one minute or less (Scored)
+- name: 5.2.17 Ensure SSH LoginGraceTime is set to one minute or less (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^LoginGraceTime'
+    line: 'LoginGraceTime 60'
+  notify: restart ssh
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.17
+    - level1
+
+## Section 5.2.18 -- Ensure SSH access is limited (Scored)
+- name: 5.2.18 Ensure SSH access is limited (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^{{item.name}}'
+    line: '{{item.name}} {{item.value}}'
+  with_items:
+    - { name: 'AllowUsers' , value: '{{ amazonlinux2cis_sshd_allow_users }}' }
+    - { name: 'AllowGroups' , value: '{{ amazonlinux2cis_sshd_allow_groups }}' }
+    - { name: 'DenyUsers' , value: '{{ amazonlinux2cis_sshd_deny_users }}' }
+    - { name: 'DenyGroups' , value: '{{ amazonlinux2cis_sshd_deny_groups }}' }
+  notify: restart ssh
+  when: amazonlinux2cis_ensure_ssh_access_is_limited
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.18
+    - level1
+
+## Section 5.2.19 -- Ensure SSH warning banner is configured (Scored)
+- name: 5.2.19 Ensure SSH warning banner is configured (Scored)
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^Banner'
+    line: 'Banner /etc/issue.net'
+  notify: restart ssh
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.2
+    - section5.2.19
+    - level1
+
+## Section 5.3 Configure PAM
+## Section 5.3.1 -- Ensure password creation requirements are configured (Scored)
+- name: 5.3.1 Ensure password creation requirements are configured (Scored) -- pwquality.conf
+  lineinfile:
+    name: /etc/security/pwquality.conf
+    regexp: '^{{item.name}}'
+    line: '{{item.name}}={{item.value}}'
+  with_items:
+    - { name: 'minlen' , value: '14' }
+    - { name: 'dcredit' , value: '-1' }
+    - { name: 'ucredit' , value: '-1' }
+    - { name: 'ocredit' , value: '-1' }
+    - { name: 'lcredit' , value: '-1' }
+  when: amazonlinux2cis_password_complexity
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.3
+    - section5.3.1
+    - level1
+
+# - name: 5.3.1 Ensure password creation requirements are configured (Scored) -- password-auth -- not sure
+#   lineinfile:
+#     name: /etc/pam.d/password-auth
+#     regexp: 'pam_pwquality.so'
+#     line: 'password        requisite                       pam_pwquality.so try_first_pass retry=3'
+#   when: amazonlinux2cis_password_complexity
+#   tags:
+#     - amazonlinux2
+#     - section5
+#     - section5.3
+#     - section5.3.1
+#     - level1
+
+## Section 5.3.2 -- Ensure lockout for failed password attempts is configured (Scored)
+- name: 5.3.2 Ensure lockout for failed password attempts is configured (Scored)
+  lineinfile:
+    name: /etc/pam.d/common-auth
+    regexp: '^(((?!pam_tally2).)*$\nauth\s+\[success\=1\sdefault\=ignore\]\s+pam_unix.so\s)'
+    insertbefore: '^(auth\s+\[success\=1\sdefault\=ignore\]\s+pam_unix.so\s.*)'
+    line: 'auth    required      pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900'
+    state: present
+  when: amazonlinux2cis_lockout_for_failed_password_attempts_pam_tally2
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.3
+    - section5.3.2
+    - level1
+
+## Section 5.3.3 -- Ensure password reuse is limited (Scored)
+# - name: 5.3.3 Ensure password reuse is limited (Scored)
+#   lineinfile:
+#     name: /etc/pam.d/common-password
+#     regexp: '^(password\s+\[success\=1\sdefault\=ignore\]\s+pam_unix.so\s((?!remember\=5).)*$)'
+#     backrefs: yes
+#     line: '\1 remember=5'
+#     state: present
+#   tags:
+#     - amazonlinux2
+#     - section5
+#     - section5.3
+#     - section5.3.3
+#     - level1
+
+## Section 5.3.4 -- Ensure password hashing algorithm is SHA-512 (Scored)
+
+## Section 5.4 -- User Accounts and Environment
+## Section 5.4.1 -- Set Shadow Password Suite Parameters
+- command: grep -oP '(?<=^PASS_MAX_DAYS\s)[0-9]+' /etc/login.defs
+  register: pass_max_days
+  changed_when: False
+  check_mode: no
+  ignore_errors: true
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.4
+    - section5.4.1
+    - section5.4.1.1
+    - level1
+
+- name: 5.4.1.1 Ensure password expiration is 365 days or less (Scored)
+  lineinfile:
+    dest: /etc/login.defs
+    line: 'PASS_MAX_DAYS 90'
+    regexp: '^PASS_MAX_DAYS'
+  ignore_errors: true
+  when:
+    - pass_max_days.stdout|int > 90
+    - amazonlinux2cis_password_expiration_ninty_days
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.4
+    - section5.4.1
+    - section5.4.1.1
+    - level1
+
+- command: grep -oP '(?<=^PASS_MIN_DAYS\s)[0-9]+' /etc/login.defs
+  register: pass_min_days
+  changed_when: False
+  check_mode: no
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.4
+    - section5.4.1
+    - section5.4.1.2
+    - level1
+
+- name: 5.4.1.2 Ensure minimum days between password changes is 7 or more (Scored)
+  lineinfile:
+    dest: /etc/login.defs
+    line: 'PASS_MIN_DAYS 7'
+    regexp: '^PASS_MIN_DAYS'
+  when:
+    - pass_min_days.stdout|int < 7
+    - amazonlinux2cis_password_change_seven_day_delay
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.4
+    - section5.4.1
+    - section5.4.1.2
+    - level1
+
+- command: grep -oP '(?<=^PASS_WARN_AGE\s)[0-9]+' /etc/login.defs
+  register: pass_warn_age
+  changed_when: False
+  check_mode: no
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.4
+    - section5.4.1
+    - section5.4.1.3
+    - level1
+
+- name: 5.4.1.3 Ensure password expiration warning days is 7 or more (Scored)
+  lineinfile:
+    dest: /etc/login.defs
+    line: 'PASS_WARN_AGE 7'
+    regexp: '^PASS_WARN_AGE'
+  when: pass_warn_age.stdout|int < 7
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.4
+    - section5.4.1
+    - section5.4.1.3
+    - level1
+
+- command: grep INACTIVE /etc/login.defs
+  changed_when: False
+  failed_when: False
+  check_mode: no
+  register: lock_inactive_rc
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.4
+    - section5.4.1
+    - section5.4.1.4
+    - level1
+
+- name: 5.4.1.4 Ensure inactive password lock is 30 days or less (Scored)
+  lineinfile:
+    dest: /etc/login.defs
+    line: 'INACTIVE=35'
+    state: present
+  when: lock_inactive_rc.rc == 1
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.4
+    - section5.4.1
+    - section5.4.1.4
+    - level1
+
+# - name: 5.4.1.5 Ensure all users last password change date is in the past (Scored)
+
+## Section 5.4.2 -- Ensure system accounts are non-login (Scored)
+## Section 5.4.3 -- Ensure default group for the root account is GID 0 (Scored)
+
+## Section 5.4.4 -- Ensure default user umask is 027 or more restrictive (Scored)
+- name: 5.4.4 Ensure default user umask is 027 or more restrictive (Scored)
+  lineinfile:
+    dest: "{{ item }}"
+    line: 'umask 027'
+    regexp: '^umask'
+    state: present
+  with_items:
+    - '/etc/bash.bashrc'
+    - '/etc/profile'
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.4
+    - section5.4.4
+    - level1
+
+## Section 5.4.5 -- Ensure default user shell timeout is 900 seconds or less (Scored)
+## Section 5.5  -- Ensure root login is restricted to system console (Not Scored)
+
+## Section 5.6 -- Ensure access to the su command is restricted (Scored)
+- name: 5.6 Ensure access to the su command is restricted (Scored)
+  lineinfile:
+    dest: /etc/pam.d/su
+    line: 'auth            required        pam_wheel.so use_uid'
+    state: present
+  tags:
+    - amazonlinux2
+    - section5
+    - section5.6
+    - level1
+
+## Section 6 System Maintenance
+## Section 6.1 -- System File Permissions
+## Section 6.1.1 -- Audit system file permissions (Not Scored)
+
+## Section 6.1.2 -- Ensure permissions on /etc/passwd are configured (Scored)
+- name: 6.1.2 Ensure permissions on /etc/passwd are configured (Scored)
+  file:
+    path: /etc/passwd
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.1
+    - section6.1.2
+    - level1
+
+## Section 6.1.3 -- Ensure permissions on /etc/shadow are configured (Scored)
+- name: 6.1.3 Ensure permissions on /etc/shadow are configured (Scored)
+  file:
+    path: /etc/shadow
+    owner: root
+    group: root
+    mode: 0000
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.1
+    - section6.1.3
+    - level1
+
+## Section 6.1.4 -- Ensure permissions on /etc/group are configured (Scored)
+- name: 6.1.4 Ensure permissions on /etc/group are configured (Scored)
+  file:
+    path: /etc/group
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.1
+    - section6.1.4
+    - level1
+
+## Section 6.1.5 -- Ensure permissions on /etc/gshadow are configured (Scored)
+- name: 6.1.5 Ensure permissions on /etc/gshadow are configured (Scored)
+  file:
+    path: /etc/gshadow
+    owner: root
+    group: root
+    mode: 0000
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.1
+    - section6.1.5
+    - level1
+
+## Section 6.1.6 -- Ensure permissions on /etc/passwd- are configured (Scored)
+- name: 6.1.6 Ensure permissions on /etc/passwd- are configured (Scored)
+  file:
+    path: /etc/passwd-
+    owner: root
+    group: root
+    mode: u-x,go-wx
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.1
+    - section6.1.6
+    - level1
+
+## Section 6.1.7 -- Ensure permissions on /etc/shadow- are configured (Scored)
+- name: 6.1.7 Ensure permissions on /etc/shadow- are configured (Scored)
+  file:
+    path: /etc/shadow-
+    owner: root
+    group: root
+    mode: 0000
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.1
+    - section6.1.7
+    - level1
+
+## Section 6.1.8 -- Ensure permissions on /etc/group- are configured (Scored)
+- name: 6.1.8 Ensure permissions on /etc/group- are configured (Scored)
+  file:
+    path: /etc/group-
+    owner: root
+    group: root
+    mode: u-x,go-wx
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.1
+    - section6.1.8
+    - level1
+
+## Section 6.1.9 -- Ensure permissions on /etc/gshadow- are configured (Scored)
+- name: 6.1.9 Ensure permissions on /etc/gshadow- are configured (Scored)
+  file:
+    path: /etc/gshadow-
+    owner: root
+    group: root
+    mode: 0000
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.1
+    - section6.1.9
+    - level1
+
+## Section 6.1.10 -- Ensure no world writable files exist (Scored)
+## Section 6.1.11 -- Ensure no unowned files or directories exist (Scored)
+## Section 6.1.12 -- Ensure no ungrouped files or directories exist (Scored)
+## Section 6.1.13 -- Audit SUID executables (Not Scored)
+## Section 6.1.14 -- Audit SGID executables (Not Scored)
+
+## Section 6.2 -- User and Group Settings
+## Section 6.2.1 -- Ensure password fields are not empty (Scored)
+## Section 6.2.2 -- Ensure no legacy "+" entries exist in /etc/passwd (Scored)
+## Section 6.2.3 -- Ensure no legacy "+" entries exist in /etc/shadow (Scored)
+## Section 6.2.4 -- Ensure no legacy "+" entries exist in /etc/group (Scored)
+## Section 6.2.5 -- Ensure root is the only UID 0 account (Scored)
+## Section 6.2.6 -- Ensure root PATH Integrity (Scored)
+## Section 6.2.7 -- Ensure all users' home directories exist (Scored)
+
+## Section 6.2.8 -- Ensure users' home directories permissions are 750 or more restrictive (Scored)
+- name: 6.2.8 Ensure users' home directories permissions are 750 or more restrictive (Scored)
+  copy:
+    src: 6.2.8.sh
+    dest: /opt/6.2.8.sh
+    owner: root
+    group: root
+    mode: 0700
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.2
+    - section6.2.8
+    - level1
+
+- name: 6.2.8 Ensure users' home directories permissions are 750 or more restrictive (Scored)
+  shell: /opt/6.2.8.sh
+  args:
+    executable: /bin/bash
+  register: home_directories_permissions
+  when: amazonlinux2cis_modify_user_homes
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.2
+    - section6.2.8
+    - level1
+
+- name: 6.2.8 Ensure users' home directories permissions are 750 or more restrictive (Scored)
+  debug:
+    var: home_directories_permissions.stdout_lines
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.2
+    - section6.2.8
+    - level1
+
+- name: 6.2.8 Ensure users' home directories permissions are 750 or more restrictive (Scored)
+  file:
+    path: /opt/6.2.8.sh
+    owner: root
+    group: root
+    state: absent
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.2
+    - section6.2.8
+    - level1
+
+## Section 6.2.9 -- Ensure users own their home directories (Scored)
+- name: 6.2.9 Ensure users own their home directories (Scored)
+  copy:
+    src: 6.2.9.sh
+    dest: /opt/6.2.9.sh
+    owner: root
+    group: root
+    mode: 0700
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.2
+    - section6.2.9
+    - level1
+
+- name: 6.2.9 Ensure users own their home directories (Scored)
+  shell: /opt/6.2.9.sh
+  args:
+    executable: /bin/bash
+  register: home_directories_own
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.2
+    - section6.2.9
+    - level1
+
+- name: 6.2.9 Ensure users own their home directories (Scored)
+  debug:
+    var: home_directories_own.stdout_lines
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.2
+    - section6.2.9
+    - level1
+
+- name: 6.2.9 Ensure users own their home directories (Scored)
+  file:
+    path: /opt/6.2.9.sh
+    owner: root
+    group: root
+    state: absent
+  tags:
+    - amazonlinux2
+    - section6
+    - section6.2
+    - section6.2.9
+    - level1
+
+## Section 6.2.10 -- Ensure users' dot files are not group or world writable (Scored)
+## Section 6.2.11 -- Ensure no users have .forward files (Scored)
+## Section 6.2.12 -- Ensure no users have .netrc files (Scored)
+## Section 6.2.13 -- Ensure users' .netrc Files are not group or world accessible (Scored)
+## Section 6.2.14 -- Ensure no users have .rhosts files (Scored)
+## Section 6.2.15 -- Ensure all groups in /etc/passwd exist in /etc/group (Scored)
+## Section 6.2.16 -- Ensure no duplicate UIDs exist (Scored)
+## Section 6.2.17 -- Ensure no duplicate GIDs exist (Scored)
+## Section 6.2.18 -- Ensure no duplicate user names exist (Scored)
+## Section 6.2.19 -- Ensure no duplicate group names exist (Scored)
+
