@@ -37,3 +37,8 @@ amazonlinux2cis_password_change_seven_day_delay: false
 
 amazonlinux2cis_modify_user_homes: false
 
+# Lenovo Linux v4.1
+## Section 1.1.1.1
+lenovo_linux_password_expiration_ninty_days: false
+
+

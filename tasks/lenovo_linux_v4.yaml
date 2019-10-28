@@ -1,0 +1,30 @@
+- command: grep -oP '(?<=^PASS_MAX_DAYS\s)[0-9]+' /etc/login.defs
+  register: pass_max_days
+  changed_when: False
+  check_mode: no
+  ignore_errors: true
+  tags:
+    - lenovo
+    - section.1.1.1.1
+
+- name: Lenovo AD.1.1.1.1 Password Requirements - /etc/login.defs
+  lineinfile:
+    dest: /etc/login.defs
+    line: 'PASS_MAX_DAYS 90'
+    regexp: '^PASS_MAX_DAYS'
+  ignore_errors: true
+  when:
+    - pass_max_days.stdout|int > 90
+    - lenovo_linux_password_expiration_ninty_days
+  tags:
+    - lenovo
+    - section.1.1.1.1
+
+- command: awk -F':' '{if ($2!=""&&$2!="*"&&$2!="!!"&&$1!="root") print $1,$5}' /etc/shadow
+  register: pass_max_days_in_shadow
+  changed_when: false
+  check_mode: no
+  ignore_errors: true
+  tags:
+    - lenovo
+    - section.1.1.1.2

@@ -1,3 +1,7 @@
 ---
 - import_tasks: amazon_linux_2.yaml
   when: "'Amazon' in ansible_distribution"
+
+- import_tasks: lenovo_linux_v4.yaml
+  tags:
+    - lenovo
